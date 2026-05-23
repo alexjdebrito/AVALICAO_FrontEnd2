@@ -6,7 +6,7 @@ export interface WeatherData {
   windSpeed: number;
   icon: string;
   rawIcon: string;
-  timezoneOffset: number; // seconds offset from UTC, e.g. -10800 = UTC-3
+  timezoneOffset: number;
 }
 
 export interface ForecastDay {
@@ -79,45 +79,20 @@ export function getWeatherTheme(iconCode: string): WeatherTheme {
   };
 }
 
-export async function fetchWeather(city: string): Promise<WeatherData> {
-  const sanitizedCity = encodeURIComponent(city.trim());
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${sanitizedCity}&appid=${API_KEY}&units=metric&lang=pt_br`;
-
-  try {
-    const response = await fetch(url);
-
-    if (response.status === 404) {
-      throw new Error('Cidade não encontrada. Verifique a grafia e tente novamente.');
-    }
-    if (!response.ok) {
-      throw new Error('Erro ao conectar com o serviço de clima.');
-    }
-
-    const data = await response.json();
-
-    return {
-      name: data.name,
-      temp: Math.round(data.main.temp),
-      condition: data.weather[0].description,
-      humidity: data.main.humidity,
-      windSpeed: Math.round(data.wind.speed * 3.6),
-      icon: getEmojiIcon(data.weather[0].icon),
-      rawIcon: data.weather[0].icon,
-      timezoneOffset: data.timezone, // seconds offset from UTC
-    };
-  } catch (error: any) {
-    throw new Error(error.message || 'Falha ao buscar dados climáticos.');
-  }
+function mapWeatherData(data: any): WeatherData {
+  return {
+    name: data.name,
+    temp: Math.round(data.main.temp),
+    condition: data.weather[0].description,
+    humidity: data.main.humidity,
+    windSpeed: Math.round(data.wind.speed * 3.6),
+    icon: getEmojiIcon(data.weather[0].icon),
+    rawIcon: data.weather[0].icon,
+    timezoneOffset: data.timezone,
+  };
 }
 
-export async function fetchForecast(city: string): Promise<ForecastDay[]> {
-  const sanitizedCity = encodeURIComponent(city.trim());
-  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${sanitizedCity}&appid=${API_KEY}&units=metric&lang=pt_br`;
-
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Erro ao buscar previsão do tempo.');
-  const data = await response.json();
-
+function parseForecast(data: any): ForecastDay[] {
   const days: Record<string, { temps: number[]; condition: string; icon: string }> = {};
 
   for (const item of data.list) {
@@ -149,4 +124,40 @@ export async function fetchForecast(city: string): Promise<ForecastDay[]> {
         icon: getEmojiIcon(info.icon),
       };
     });
+}
+
+export async function fetchWeather(city: string): Promise<WeatherData> {
+  const sanitizedCity = encodeURIComponent(city.trim());
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${sanitizedCity}&appid=${API_KEY}&units=metric&lang=pt_br`;
+
+  try {
+    const response = await fetch(url);
+    if (response.status === 404) throw new Error('Cidade não encontrada. Verifique a grafia e tente novamente.');
+    if (!response.ok) throw new Error('Erro ao conectar com o serviço de clima.');
+    return mapWeatherData(await response.json());
+  } catch (error: any) {
+    throw new Error(error.message || 'Falha ao buscar dados climáticos.');
+  }
+}
+
+export async function fetchWeatherByCoords(lat: number, lon: number): Promise<WeatherData> {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=pt_br`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Erro ao buscar clima da localização atual.');
+  return mapWeatherData(await response.json());
+}
+
+export async function fetchForecast(city: string): Promise<ForecastDay[]> {
+  const sanitizedCity = encodeURIComponent(city.trim());
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${sanitizedCity}&appid=${API_KEY}&units=metric&lang=pt_br`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Erro ao buscar previsão do tempo.');
+  return parseForecast(await response.json());
+}
+
+export async function fetchForecastByCoords(lat: number, lon: number): Promise<ForecastDay[]> {
+  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=pt_br`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Erro ao buscar previsão da localização atual.');
+  return parseForecast(await response.json());
 }

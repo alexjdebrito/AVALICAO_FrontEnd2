@@ -61,42 +61,105 @@ const theme = createTheme({
     borderRadius: 8,
   },
 
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        '*, *::before, *::after': {
-          boxSizing: 'border-box',
-        },
-        body: {
-          WebkitFontSmoothing: 'antialiased',
-        },
-        '::placeholder': {
+components: {
+  MuiCssBaseline: {
+    styleOverrides: {
+      '*, *::before, *::after': {
+        boxSizing: 'border-box',
+      },
+
+      body: {
+        WebkitFontSmoothing: 'antialiased',
+      },
+
+      '::placeholder': {
+        color: 'rgba(255, 255, 255, 0.6)',
+      },
+    },
+  },
+
+  MuiButton: {
+    styleOverrides: {
+      root: {
+        textTransform: 'none',
+        fontWeight: 600,
+        fontSize: '1rem',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.25)',
+        border: '1px solid rgba(255,255,255,0.35)',
+        backdropFilter: 'blur(4px)',
+        color: 'inherit',
+      },
+    },
+  },
+
+  MuiInputBase: {
+    styleOverrides: {
+      input: {
+        color: 'inherit',
+
+        '&::placeholder': {
           color: 'rgba(255, 255, 255, 0.6)',
-        },
-      },
-    },
-
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 600,
-          fontSize: '1rem',
-        },
-      },
-    },
-
-    MuiInputBase: {
-      styleOverrides: {
-        input: {
-          '&::placeholder': {
-            color: 'rgba(255, 255, 255, 0.6)',
-            opacity: 1,
-          },
+          opacity: 1,
         },
       },
     },
   },
+
+  MuiOutlinedInput: {
+    styleOverrides: {
+      root: {
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(4px)',
+        color: 'inherit',
+
+        '& fieldset': {
+          border: '1px solid rgba(255,255,255,0.35)',
+        },
+
+        '&:hover fieldset': {
+          border: '1px solid rgba(255,255,255,0.5)',
+        },
+
+        '&.Mui-focused fieldset': {
+          border: '1px solid rgba(255,255,255,0.7)',
+        },
+
+        '& input': {
+          padding: '12px 16px',
+        },
+
+        '& input::placeholder': {
+          color: 'rgba(255,255,255,0.6)',
+          opacity: 1,
+        },
+      },
+    },
+  },
+
+  MuiPaper: {
+    styleOverrides: {
+      root: {
+        background: 'rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(4px)',
+        border: '1px solid rgba(255,255,255,0.35)',
+        boxShadow: 'none',
+      },
+    },
+  },
+
+  MuiCard: {
+    styleOverrides: {
+      root: {
+        background: 'rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(4px)',
+        border: '1px solid rgba(255,255,255,0.35)',
+        boxShadow: 'none',
+      },
+    },
+  },
+},
 });
 
 export default theme;
