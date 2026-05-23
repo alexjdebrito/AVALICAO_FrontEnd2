@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { TextField, Button, Typography } from '@mui/material';
 
 import {
   fetchWeather,
-  fetchWeatherByCoords,
   fetchForecast,
-  fetchForecastByCoords,
   getWeatherTheme,
   WeatherData,
   ForecastDay,
@@ -21,59 +19,17 @@ interface Props {
 
 export default function Home({ onThemeChange }: Props) {
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastDay[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [locating, setLocating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [weatherData, setWeatherData] =
+    useState<WeatherData | null>(null);
 
-  // Auto-load current location on mount
-  useEffect(() => {
-    if (!navigator.geolocation) return;
+  const [forecast, setForecast] =
+    useState<ForecastDay[]>([]);
 
-    setLocating(true);
+  const [loading, setLoading] =
+    useState(false);
 
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        setLocating(false);
-        setLoading(true);
-
-        try {
-          const [data, forecastDays] = await Promise.all([
-            fetchWeatherByCoords(
-              coords.latitude,
-              coords.longitude
-            ),
-
-            fetchForecastByCoords(
-              coords.latitude,
-              coords.longitude
-            ),
-          ]);
-
-          setWeatherData(data);
-          setForecast(forecastDays);
-          setCity(data.name);
-
-          onThemeChange(
-            getWeatherTheme(data.rawIcon)
-          );
-        } catch {
-          // Silently ignore
-        } finally {
-          setLoading(false);
-        }
-      },
-
-      () => {
-        setLocating(false);
-      },
-
-      {
-        timeout: 8000,
-      }
-    );
-  }, []);
+  const [error, setError] =
+    useState<string | null>(null);
 
   const handleSearch = async (
     e: React.FormEvent
@@ -83,9 +39,11 @@ export default function Home({ onThemeChange }: Props) {
     if (!city.trim()) return;
 
     setLoading(true);
+
     setError(null);
 
     setWeatherData(null);
+
     setForecast([]);
 
     onThemeChange(null);
@@ -98,6 +56,7 @@ export default function Home({ onThemeChange }: Props) {
         ]);
 
       setWeatherData(data);
+
       setForecast(forecastDays);
 
       onThemeChange(
@@ -105,7 +64,8 @@ export default function Home({ onThemeChange }: Props) {
       );
     } catch (err: any) {
       setError(
-        err.message || 'Erro ao buscar dados.'
+        err.message ||
+          'Erro ao buscar dados.'
       );
     } finally {
       setLoading(false);
@@ -121,18 +81,23 @@ export default function Home({ onThemeChange }: Props) {
         fontFamily: 'sans-serif',
       }}
     >
-      <Typography variant="h2"
-        style={{ fontSize: '2rem'}}>
+      <Typography
+        variant="h2"
+        style={{ fontSize: '2rem' }}
+      >
         Consultar Clima
       </Typography>
 
-      <Typography variant="body1"
+      <Typography
+        variant="body1"
         style={{
           textAlign: 'center',
           color: 'inherit',
           marginBottom: '32px',
-        }}>
-      Descubra as condições climáticas atuais de qualquer cidade.
+        }}
+      >
+        Descubra as condições climáticas atuais
+        de qualquer cidade.
       </Typography>
 
       <form
@@ -150,35 +115,24 @@ export default function Home({ onThemeChange }: Props) {
           onChange={(e) =>
             setCity(e.target.value)
           }
-          disabled={loading || locating}
+          disabled={loading}
         />
 
         <Button
           type="submit"
-          disabled={loading || locating}
+          disabled={loading}
         >
-          {loading ? 'Buscando...' : 'Buscar'}
+          {loading
+            ? 'Buscando...'
+            : 'Buscar'}
         </Button>
       </form>
-
-      {locating && (
-        <div
-          style={{
-            textAlign: 'center',
-            opacity: 0.7,
-            marginBottom: '24px',
-            fontSize: '0.9rem',
-            color: '#fff',
-          }}
-        >
-          📍 Detectando sua localização...
-        </div>
-      )}
 
       {error && (
         <div
           style={{
             padding: '16px',
+
             background:
               'rgba(239,68,68,0.2)',
 
