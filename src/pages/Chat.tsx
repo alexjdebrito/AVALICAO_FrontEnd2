@@ -7,7 +7,7 @@ interface Message {
   text: string;
 }
 
-const GEMINI_API_KEY = 'SUA_API_KEY';
+const GEMINI_API_KEY = 'AIzaSyDK9zto4Ti2JFZiR5xUqUz6V5pPua2mRXE';
 
 const INITIAL: Message = {
   sender: 'gemini',
@@ -29,18 +29,22 @@ export default function Chat() {
     setLoading(true);
 
     try {
+      // URL corrigida de v1beta para v1 para aceitar o modelo gemini-2.5-flash
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: userText }] }] }),
         }
       );
-      if (!res.ok) throw new Error();
+      
+      if (!res.ok) throw new Error(`Erro status: ${res.status}`);
+      
       const data = await res.json();
       setMessages(prev => [...prev, { sender: 'gemini', text: data.candidates[0].content.parts[0].text }]);
-    } catch {
+    } catch (error) {
+      console.error("Erro na integração com o Gemini:", error);
       setMessages(prev => [...prev, { sender: 'gemini', text: 'Desculpe, não consegui processar sua mensagem. Tente novamente.' }]);
     } finally {
       setLoading(false);
@@ -93,7 +97,7 @@ export default function Chat() {
             <Typography variant="body2" sx={{ fontStyle: 'italic' }}>Gemini está pensando...</Typography>
           </Box>
         )}
-        </Box>
+      </Box>
 
       {/* Input */}
       <Box component="form" onSubmit={sendMessage} sx={{ display: 'flex', gap: 1.5 }}>
