@@ -1,170 +1,108 @@
-import { useState } from 'react';
-import { TextField, Button, Typography } from '@mui/material';
+import { useState, useRef, useEffect } from 'react';
+import { Box, TextField, Button, Typography, CircularProgress } from '@mui/material';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
 
 interface Message {
   sender: 'user' | 'gemini';
   text: string;
 }
 
-export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-    sender: 'gemini',
-    text:
-      'Olá! Sou o assistente do ClimaApp alimentado pelo Gemini. Como posso te ajudar hoje?',
-    },
-  ]);
+const GEMINI_API_KEY = 'SUA_API_KEY';
 
+const INITIAL: Message = {
+  sender: 'gemini',
+  text: 'Olá! Sou o assistente do ClimaApp. Posso te ajudar com dúvidas sobre clima, previsões e muito mais.',
+};
+
+export default function Chat() {
+  const [messages, setMessages] = useState<Message[]>([INITIAL]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const GEMINI_API_KEY = 'SUA_API_KEY';
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!input.trim() || loading) return;
 
-    const userMessage = input.trim();
-
+    const userText = input.trim();
     setInput('');
-    setMessages((prev) => [
-      ...prev,
-      { sender: 'user', text: userMessage },
-    ]);
-
+    setMessages(prev => [...prev, { sender: 'user', text: userText }]);
     setLoading(true);
 
     try {
-      const response = await fetch(
+      const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: userMessage }],
-              },
-            ],
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: userText }] }] }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error('Erro ao falar com o Gemini.');
-      }
-
-      const data = await response.json();
-
-      const geminiResponse =
-        data.candidates[0].content.parts[0].text;
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'gemini',
-          text: geminiResponse,
-        },
-      ]);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setMessages(prev => [...prev, { sender: 'gemini', text: data.candidates[0].content.parts[0].text }]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'gemini',
-          text:
-            'Desculpe, tive um problema para processar sua mensagem.',
-        },
-      ]);
+      setMessages(prev => [...prev, { sender: 'gemini', text: 'Desculpe, não consegui processar sua mensagem. Tente novamente.' }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-      <Typography variant="h2"
-        style={{ fontSize: '2rem'}}>
-        Conversar com a IA
-      </Typography>
-
-      <Typography variant="body1"
-        style={{
-          textAlign: 'center',
-          color: 'inherit',
-          marginBottom: '32px',
-        }}>
+    <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+      <Typography variant="h2" gutterBottom>Conversar com a IA</Typography>
+      <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, opacity: 0.8 }}>
         Tire suas dúvidas sobre o clima, previsões ou qualquer outro assunto.
       </Typography>
 
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(4px)',
-          border: '1px solid rgba(255,255,255,0.35)',
-          borderRadius: '12px',
-          padding: '16px',
-          height: '400px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-          marginBottom: '16px',
-        }}
-      >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            style={{
-              alignSelf:
-                msg.sender === 'user'
-                  ? 'flex-end'
-                  : 'flex-start',
-
-              background:
-                msg.sender === 'user'
-                  ? 'rgba(255,255,255,0.25)'
-                  : 'rgba(255,255,255,0.15)',
-
-              border: '1px solid rgba(255,255,255,0.25)',
-
-              color: '#fff',
-
-              padding: '10px 14px',
-              borderRadius: '12px',
+      {/* Message list */}
+      <Box sx={{
+        background: 'rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: 3,
+        p: 2,
+        height: 200,
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        mb: 2,
+      }}>
+        {messages.map((msg, i) => (
+          <Box
+            key={i}
+            sx={{
+              alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+              background: msg.sender === 'user' ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 2.5,
+              px: 1.75,
+              py: 1.25,
               maxWidth: '80%',
               fontSize: '0.95rem',
-              lineHeight: '1.4',
+              lineHeight: 1.5,
               whiteSpace: 'pre-wrap',
             }}
           >
             {msg.text}
-          </div>
+          </Box>
         ))}
-
         {loading && (
-          <div
-            style={{
-              alignSelf: 'flex-start',
-              color: 'rgba(255,255,255,0.7)',
-              fontSize: '0.85rem',
-              fontStyle: 'italic',
-            }}
-          >
-            Gemini está pensando...
-          </div>
+          <Box sx={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 1, opacity: 0.7 }}>
+            <CircularProgress size={14} sx={{ color: 'inherit' }} />
+            <Typography variant="body2" sx={{ fontStyle: 'italic' }}>Gemini está pensando...</Typography>
+          </Box>
         )}
-      </div>
+        <div ref={bottomRef} />
+      </Box>
 
-      <form
-        onSubmit={handleSendMessage}
-        style={{
-          display: 'flex',
-          gap: '12px',
-        }}
-      >
+      {/* Input */}
+      <Box component="form" onSubmit={sendMessage} sx={{ display: 'flex', gap: 1.5 }}>
         <TextField
           fullWidth
           placeholder="Digite sua mensagem..."
@@ -172,14 +110,10 @@ export default function Chat() {
           onChange={(e) => setInput(e.target.value)}
           disabled={loading}
         />
-
-        <Button
-          type="submit"
-          disabled={loading}
-        >
+        <Button type="submit" disabled={loading || !input.trim()} endIcon={<SendRoundedIcon />}>
           Enviar
         </Button>
-      </form>
-    </div>
+      </Box>
+    </Box>
   );
 }

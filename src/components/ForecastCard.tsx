@@ -1,51 +1,35 @@
+import { Box, Typography, Divider } from '@mui/material';
 import { ForecastDay } from '../services/weatherApi';
 
-interface Props {
-  days: ForecastDay[];
-}
+const glassCard = {
+  background: 'rgba(255,255,255,0.15)',
+  backdropFilter: 'blur(8px)',
+  borderRadius: 3,
+  border: '1px solid rgba(255,255,255,0.2)',
+};
 
-export default function ForecastCard({ days }: Props) {
+export default function ForecastCard({ days }: { days: ForecastDay[] }) {
   return (
-    <div style={{
-      marginTop: '24px',
-      background: 'rgba(255,255,255,0.15)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: '16px',
-      padding: '16px',
-      border: '1px solid rgba(255,255,255,0.2)',
-    }}>
-      <h4 style={{
-        margin: '0 0 12px',
-        color: 'inherit',
-        fontSize: '0.85rem',
-        fontWeight: 600,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        opacity: 0.8,
-      }}>
+    <Box sx={{ ...glassCard, p: 2, mt: 2 }}>
+      <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', opacity: 0.7, mb: 1.5 }}>
         Próximos 5 dias
-      </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {days.map((day) => (
-          <div key={day.date} style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '8px 0',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-          }}>
-            <span style={{ width: '72px', fontWeight: 600, fontSize: '0.9rem' }}>{day.date}</span>
-            <span style={{ fontSize: '1.4rem' }}>{day.icon}</span>
-            <span style={{ flex: 1, paddingLeft: '12px', fontSize: '0.8rem', opacity: 0.75, textTransform: 'capitalize' }}>
+      </Typography>
+      {days.map((day, i) => (
+        <Box key={day.date}>
+          <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
+            <Typography sx={{ width: 72, fontWeight: 600, fontSize: '0.9rem' }}>{day.date}</Typography>
+            <span style={{ fontSize: '1.4rem', marginRight: 12 }}>{day.icon}</span>
+            <Typography sx={{ flex: 1, fontSize: '0.8rem', opacity: 0.75, textTransform: 'capitalize' }}>
               {day.condition}
-            </span>
-            <div style={{ display: 'flex', gap: '8px', fontSize: '0.9rem', fontWeight: 600 }}>
-              <span style={{ opacity: 0.6 }}>{day.tempMin}°</span>
-              <span>{day.tempMax}°</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, fontWeight: 600, fontSize: '0.9rem' }}>
+              <Typography component="span" sx={{ opacity: 0.55, fontWeight: 400, fontSize: '0.9rem' }}>{day.tempMin}°</Typography>
+              <Typography component="span" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>{day.tempMax}°</Typography>
+            </Box>
+          </Box>
+          {i < days.length - 1 && <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />}
+        </Box>
+      ))}
+    </Box>
   );
 }

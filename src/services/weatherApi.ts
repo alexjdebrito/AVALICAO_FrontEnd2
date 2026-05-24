@@ -49,12 +49,12 @@ export function getWeatherTheme(iconCode: string): WeatherTheme {
   };
   if (iconCode.startsWith('02') || iconCode.startsWith('03') || iconCode.startsWith('04')) return {
     gradient: 'linear-gradient(160deg, #b2bec3 0%, #636e72 100%)',
-    imageUrl: 'https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?w=1920&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1688408958843-4489b3703ecb?w=1920&q=80',
     textColor: '#fff',
   };
   if (iconCode.startsWith('09') || iconCode.startsWith('10')) return {
     gradient: 'linear-gradient(160deg, #4a6fa5 0%, #2d3a4a 100%)',
-    imageUrl: 'https://images.unsplash.com/photo-1530743373890-f3c506b0b5b1?w=1920&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1743361883000-b867c2b2df08?w=1920&q=80',
     textColor: '#fff',
   };
   if (iconCode.startsWith('11')) return {

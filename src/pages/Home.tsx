@@ -1,164 +1,105 @@
-import { useState } from 'react';
-import { TextField, Button, Typography } from '@mui/material';
-
+import { useState, useEffect } from 'react';
+import { Box, TextField, Button, Typography, Alert } from '@mui/material';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import {
-  fetchWeather,
-  fetchForecast,
-  getWeatherTheme,
-  WeatherData,
-  ForecastDay,
-  WeatherTheme,
+  fetchWeather, fetchWeatherByCoords,
+  fetchForecast, fetchForecastByCoords,
+  getWeatherTheme, WeatherData, ForecastDay, WeatherTheme,
 } from '../services/weatherApi';
-
 import WeatherCard from '../components/WeatherCard';
 import ForecastCard from '../components/ForecastCard';
 
 interface Props {
-  onThemeChange: (theme: WeatherTheme | null) => void;
+  onThemeChange: (theme: WeatherTheme) => void;
 }
 
 export default function Home({ onThemeChange }: Props) {
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] =
-    useState<WeatherData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [forecast, setForecast] = useState<ForecastDay[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [forecast, setForecast] =
-    useState<ForecastDay[]>([]);
+  const applyResults = (data: WeatherData, days: ForecastDay[]) => {
+    setWeatherData(data);
+    setForecast(days);
+    onThemeChange(getWeatherTheme(data.rawIcon));
+  };
 
-  const [loading, setLoading] =
-    useState(false);
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        setLocating(false);
+        setLoading(true);
+        try {
+          const [data, days] = await Promise.all([
+            fetchWeatherByCoords(coords.latitude, coords.longitude),
+            fetchForecastByCoords(coords.latitude, coords.longitude),
+          ]);
+          setCity(data.name);
+          applyResults(data, days);
+        } catch { /* silent — user can search manually */ }
+        finally { setLoading(false); }
+      },
+      () => setLocating(false),
+      { timeout: 8000 }
+    );
+  }, []);
 
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const handleSearch = async (
-    e: React.FormEvent
-  ) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!city.trim()) return;
-
     setLoading(true);
-
     setError(null);
-
-    setWeatherData(null);
-
-    setForecast([]);
-
-    onThemeChange(null);
-
     try {
-      const [data, forecastDays] =
-        await Promise.all([
-          fetchWeather(city),
-          fetchForecast(city),
-        ]);
-
-      setWeatherData(data);
-
-      setForecast(forecastDays);
-
-      onThemeChange(
-        getWeatherTheme(data.rawIcon)
-      );
+      const [data, days] = await Promise.all([fetchWeather(city), fetchForecast(city)]);
+      applyResults(data, days);
     } catch (err: any) {
-      setError(
-        err.message ||
-          'Erro ao buscar dados.'
-      );
+      setError(err.message || 'Erro ao buscar dados.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        maxWidth: '500px',
-        margin: '32px auto',
-        padding: '0 16px',
-        fontFamily: 'sans-serif',
-      }}
-    >
-      <Typography
-        variant="h2"
-        style={{ fontSize: '2rem' }}
-      >
-        Consultar Clima
+    <Box sx={{ maxWidth: 500, mx: 'auto' }}>
+      <Typography variant="h2" gutterBottom>Consultar Clima</Typography>
+      <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, opacity: 0.8 }}>
+        Descubra as condições climáticas atuais de qualquer cidade.
       </Typography>
 
-      <Typography
-        variant="body1"
-        style={{
-          textAlign: 'center',
-          color: 'inherit',
-          marginBottom: '32px',
-        }}
-      >
-        Descubra as condições climáticas atuais
-        de qualquer cidade.
-      </Typography>
-
-      <form
-        onSubmit={handleSearch}
-        style={{
-          display: 'flex',
-          gap: '16px',
-          marginBottom: '32px',
-        }}
-      >
+      <Box component="form" onSubmit={handleSearch} sx={{ display: 'flex', gap: 1.5, mb: 4 }}>
         <TextField
           fullWidth
           placeholder="Digite o nome da cidade"
           value={city}
-          onChange={(e) =>
-            setCity(e.target.value)
-          }
-          disabled={loading}
+          onChange={(e) => setCity(e.target.value)}
+          disabled={loading || locating}
         />
-
-        <Button
-          type="submit"
-          disabled={loading}
-        >
-          {loading
-            ? 'Buscando...'
-            : 'Buscar'}
+        <Button type="submit" disabled={loading || locating} startIcon={<SearchRoundedIcon />}>
+          {loading ? 'Buscando...' : 'Buscar'}
         </Button>
-      </form>
+      </Box>
+
+      {locating && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 3, opacity: 0.8 }}>
+          <MyLocationRoundedIcon fontSize="small" />
+          <Typography variant="body2">Detectando sua localização...</Typography>
+        </Box>
+      )}
 
       {error && (
-        <div
-          style={{
-            padding: '16px',
-
-            background:
-              'rgba(239,68,68,0.2)',
-
-            border:
-              '1px solid rgba(239,68,68,0.5)',
-
-            color: '#fff',
-
-            borderRadius: '8px',
-
-            marginBottom: '24px',
-
-            backdropFilter: 'blur(4px)',
-          }}
-        >
+        <Alert severity="error" sx={{ mb: 3, bgcolor: 'rgba(239,68,68,0.2)', color: '#fff', border: '1px solid rgba(239,68,68,0.5)', '& .MuiAlert-icon': { color: '#fca5a5' } }}>
           {error}
-        </div>
+        </Alert>
       )}
 
-      {weatherData && (
-        <WeatherCard data={weatherData} />
-      )}
-
-      {forecast.length > 0 && (
-        <ForecastCard days={forecast} />
-      )}
-    </div>
+      {weatherData && <WeatherCard data={weatherData} />}
+      {forecast.length > 0 && <ForecastCard days={forecast} />}
+    </Box>
   );
 }

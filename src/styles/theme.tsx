@@ -1,151 +1,75 @@
 import { createTheme } from '@mui/material/styles';
 
-const glassBackground = 'rgba(255,255,255,0.2)';
-const glassBorder = '1px solid rgba(255,255,255,0.35)';
+const glass = {
+  background: 'rgba(255,255,255,0.2)',
+  border: '1px solid rgba(255,255,255,0.35)',
+};
 
 const theme = createTheme({
   palette: {
-
-    primary: {
-      main: '#ffffff',
-    },
-
-    text: {
-      primary: '#ffffff',
-      secondary: 'rgba(255,255,255,0.75)',
-    },
-
-    background: {
-      default: 'transparent',
-      paper: 'rgba(255,255,255,0.12)',
-    },
+    primary:    { main: '#ffffff' },
+    text:       { primary: '#ffffff', secondary: 'rgba(255,255,255,0.75)' },
+    background: { default: 'transparent', paper: 'rgba(255,255,255,0.12)' },
   },
 
-typography: {
-  fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-
-  allVariants: {
-    textAlign: 'center',
-    color: '#fff',
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    allVariants: { color: '#ffffff' },
+    h2:  { fontSize: '2rem',   fontWeight: 700, textAlign: 'center' as const },
+    h5:  { fontSize: '1.5rem', fontWeight: 600 },
+    h6:  { fontSize: '1.1rem', fontWeight: 700 },
+    body1: { fontSize: '1rem', lineHeight: 1.6 },
+    body2: { fontSize: '0.875rem' },
   },
-},
 
-  shape: {
-    borderRadius: 8,
-  },
+  shape: { borderRadius: 8 },
 
   components: {
-MuiCssBaseline: {
-  styleOverrides: {
-    body: {
-      margin: 0,
-      padding: 0,
-      minHeight: '100vh',
-      WebkitFontSmoothing: 'antialiased',
-      textAlign: 'center',
-      color: '#fff',
+    MuiCssBaseline: {
+      styleOverrides: {
+        '*, *::before, *::after': { boxSizing: 'border-box' },
+        body: { margin: 0, padding: 0, WebkitFontSmoothing: 'antialiased' },
+        '::placeholder': { color: 'rgba(255,255,255,0.55)', opacity: 1 },
+      },
     },
 
-    '*': {
-      boxSizing: 'border-box',
-    },
-
-    '::placeholder': {
-      color: 'rgba(255,255,255,0.6)',
-      opacity: 1,
-    },
-  },
-},
-
-    MuiTextField: {
-      defaultProps: {
-        variant: 'outlined',
+    MuiButton: {
+      defaultProps: { variant: 'contained' },
+      styleOverrides: {
+        root: {
+          ...glass,
+          backdropFilter: 'blur(4px)',
+          color: '#fff',
+          textTransform: 'none',
+          fontWeight: 600,
+          boxShadow: 'none',
+          whiteSpace: 'nowrap',
+          '&:hover': { background: 'rgba(255,255,255,0.32)', boxShadow: 'none' },
+          '&.Mui-disabled': { opacity: 0.5, color: '#fff' },
+        },
       },
     },
 
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
-          background: glassBackground,
+          ...glass,
           backdropFilter: 'blur(4px)',
           color: '#fff',
-
-          '& fieldset': {
-            border: glassBorder,
-          },
-
-          '&:hover fieldset': {
-            border: '1px solid rgba(255,255,255,0.5)',
-          },
-
-          '&.Mui-focused fieldset': {
-            border: '1px solid rgba(255,255,255,0.7)',
-          },
-
-          '& input': {
-            padding: '12px 16px',
-            color: '#fff',
-          },
-
-          '& input::placeholder': {
-            color: 'rgba(255,255,255,0.6)',
-            opacity: 1,
-          },
+          '& fieldset':              { border: glass.border },
+          '&:hover fieldset':        { border: '1px solid rgba(255,255,255,0.5)' },
+          '&.Mui-focused fieldset':  { border: '1px solid rgba(255,255,255,0.7)' },
+          '& input':                 { padding: '12px 16px', color: '#fff' },
+          '& input::placeholder':    { color: 'rgba(255,255,255,0.55)', opacity: 1 },
         },
       },
     },
 
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '8px',
-          padding: '12px 24px',
-          background: 'rgba(255,255,255,0.25)',
-          border: glassBorder,
-          backdropFilter: 'blur(4px)',
-          color: '#fff',
-          textTransform: 'none',
-          fontWeight: 600,
-          boxShadow: 'none',
+    MuiTextField: { defaultProps: { variant: 'outlined' } },
 
-          '&:hover': {
-            background: 'rgba(255,255,255,0.35)',
-            boxShadow: 'none',
-          },
-        },
-      },
-    },
-
-    MuiCard: {
+    MuiAppBar: {
       styleOverrides: {
-        root: {
-          background: glassBackground,
-          backdropFilter: 'blur(4px)',
-          border: glassBorder,
-          boxShadow: 'none',
-          color: '#fff',
-        },
-      },
-    },
-
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          background: glassBackground,
-          backdropFilter: 'blur(4px)',
-          border: glassBorder,
-          boxShadow: 'none',
-          color: '#fff',
-        },
-      },
-    },
-
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          color: '#fff',
-        },
+        root: { backgroundImage: 'none' },
       },
     },
   },
