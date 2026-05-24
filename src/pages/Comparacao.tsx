@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Box, TextField, Button, Typography, Alert } from '@mui/material';
+import CompareArrowsRoundedIcon from '@mui/icons-material/CompareArrowsRounded';
 import { fetchWeather, WeatherData } from '../services/weatherApi';
 import WeatherCard from '../components/WeatherCard';
 
@@ -16,74 +18,61 @@ export default function Comparacao() {
       setError('Por favor, insira o nome de duas cidades para comparar.');
       return;
     }
-
     setLoading(true);
     setError(null);
     setData1(null);
     setData2(null);
-
     try {
-      const [res1, res2] = await Promise.all([
-        fetchWeather(city1),
-        fetchWeather(city2)
-      ]);
+      const [res1, res2] = await Promise.all([fetchWeather(city1), fetchWeather(city2)]);
       setData1(res1);
       setData2(res2);
-    } catch (err: any) {
-      setError('Falha ao comparar. Verifique se digitou os nomes corretamente.');
+    } catch {
+      setError('Falha ao comparar. Verifique se os nomes estão corretos.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ fontFamily: 'sans-serif' }}>
-      <h2 style={{ textAlign: 'center', color: '#1976d2', fontSize: '2rem', marginBottom: '8px' }}>
-        Comparação de Clima
-      </h2>
-      <p style={{ textAlign: 'center', color: '#64748b', fontSize: '0.95rem', marginBottom: '32px' }}>
-        Compare de forma simples e visual a temperatura e dados de duas regiões.
-      </p>
+    <Box>
+      <Typography variant="h2" gutterBottom>Comparação de Clima</Typography>
+      <Typography variant="body1" sx={{ textAlign: 'center', mb: 4, opacity: 0.8 }}>
+        Compare de forma simples e visual o clima de duas cidades.
+      </Typography>
 
-      <form onSubmit={handleCompare} style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
+      <Box component="form" onSubmit={handleCompare} sx={{ maxWidth: 640, mx: 'auto', mb: 4 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
+          <TextField
             placeholder="Cidade 1"
             value={city1}
             onChange={(e) => setCity1(e.target.value)}
             disabled={loading}
-            style={{ flex: 1, minWidth: '200px', padding: '12px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+            sx={{ flex: 1, minWidth: 180 }}
           />
-          <div style={{ fontSize: '24px', color: '#1976d2', fontWeight: 'bold' }}>⇄</div>
-          <input
-            type="text"
+          <CompareArrowsRoundedIcon sx={{ fontSize: 28, opacity: 0.6 }} />
+          <TextField
             placeholder="Cidade 2"
             value={city2}
             onChange={(e) => setCity2(e.target.value)}
             disabled={loading}
-            style={{ flex: 1, minWidth: '200px', padding: '12px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
+            sx={{ flex: 1, minWidth: 180 }}
           />
-        </div>
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={{ width: '100%', padding: '14px', borderRadius: '8px', backgroundColor: '#1976d2', color: '#fff', border: 'none', fontSize: '1rem', fontWeight: 600, cursor: 'pointer' }}
-        >
+        </Box>
+        <Button type="submit" fullWidth disabled={loading}>
           {loading ? 'Comparando...' : 'Comparar Cidades'}
-        </button>
-      </form>
+        </Button>
+      </Box>
 
       {error && (
-        <div style={{ padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', borderRadius: '8px', marginBottom: '24px' }}>
+        <Alert severity="error" sx={{ mb: 3, maxWidth: 640, mx: 'auto', bgcolor: 'rgba(239,68,68,0.2)', color: '#fff', border: '1px solid rgba(239,68,68,0.5)', '& .MuiAlert-icon': { color: '#fca5a5' } }}>
           {error}
-        </div>
+        </Alert>
       )}
 
-      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-        {data1 && <div style={{ flex: 1, minWidth: '280px' }}><WeatherCard data={data1} /></div>}
-        {data2 && <div style={{ flex: 1, minWidth: '280px' }}><WeatherCard data={data2} /></div>}
-      </div>
-    </div>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+        {data1 && <Box sx={{ flex: 1, minWidth: 280 }}><WeatherCard data={data1} /></Box>}
+        {data2 && <Box sx={{ flex: 1, minWidth: 280 }}><WeatherCard data={data2} /></Box>}
+      </Box>
+    </Box>
   );
 }
