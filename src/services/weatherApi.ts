@@ -23,7 +23,7 @@ export interface WeatherTheme {
   textColor: string;
 }
 
-const API_KEY = '58528f231ceb5f9785597d221729ddc4';
+const API_KEY = 'CHAVE_API';
 
 function getEmojiIcon(iconCode: string): string {
   if (iconCode.startsWith('01')) return '☀️';
